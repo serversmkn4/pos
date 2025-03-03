@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS</title>
+</head>
+<body>
+    <h1>Point of Sale</h1>
+    <ul>
+        <% products.forEach(product => { %>
+            <li>
+                <%= product.name %> - Rp<%= product.price %>
+                <button onclick="addToCart(<%= product.id %>, '<%= product.name %>', <%= product.price %>)">Tambah ke Keranjang</button>
+            </li>
+        <% }) %>
+    </ul>
+
+    <h2>Keranjang</h2>
+    <ul id="cart"></ul>
+    <button onclick="checkout()">Checkout</button>
+    <a href="/">Kembali</a>
+
+    <script>
+        let cart = [];
+
+        function addToCart(id, name, price) {
+            const existingItem = cart.find(item => item.id === id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ id, name, price, quantity: 1 });
+            }
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const cartElement = document.getElementById('cart');
+            cartElement.innerHTML = '';
+            cart.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.name} - ${item.quantity} x Rp${item.price} = Rp${item.price * item.quantity}`;
+                cartElement.appendChild(li);
+            });
+        }
+
+        function checkout() {
+            fetch('/pos/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ cart })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Checkout berhasil!');
+                cart = [];
+                updateCartDisplay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

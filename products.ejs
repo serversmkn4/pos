@@ -1,0 +1,26 @@
+<!-- views/products.ejs -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Produk</title>
+</head>
+<body>
+    <h1>Daftar Produk</h1>
+    <ul>
+        <% products.forEach(product => { %>
+            <li><%= product.name %> - Rp<%= product.price %></li>
+        <% }) %>
+    </ul> 
+ 
+    
+    
+    <form action="/products/add" method="POST">
+        <input type="text" name="name" placeholder="Nama Produk" required>
+        <input type="number" name="price" placeholder="Harga" required>
+        <button type="submit">Tambah</button>
+    </form>
+    <a href="/">Kembali</a>
+</body>
+</html>

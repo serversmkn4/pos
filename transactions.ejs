@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaksi</title>
+</head>
+<body>
+    <h1>Histori Transaksi</h1>
+    <ul>
+        <% transactions.forEach(transaction => { %>
+            <li>
+                ID: <%= transaction.id %> - Total: <span class="total-amount"><%= transaction.total %></span> - Tanggal: <%= transaction.date %>
+                <button onclick="printReceipt(<%= transaction.id %>, <%= transaction.total %>, '<%= transaction.date %>')">Cetak Struk</button>
+            </li>
+        <% }) %>
+    </ul>
+
+   
+
+    <a href="/">Kembali</a>
+
+    <div id="receipt" style="display: none;">
+        <h2>Struk Pembelian</h2>
+        <p id="receipt-content"></p>
+    </div>
+
+    
+    <script>
+        // Fungsi untuk memformat mata uang
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
+        }
+    
+        // Fungsi untuk mencetak struk
+        async function printReceipt(transactionId, total, date) {
+            try {
+                // Ambil data item transaksi dari server
+                const response = await fetch(`/transactions/${transactionId}/items`);
+                const items = await response.json();
+    
+                // Buat konten struk
+                let content = `
+                    <h2>Struk Pembelian</h2>
+                    <p>ID Transaksi: ${transactionId}</p>
+                    <p>Tanggal: ${date}</p>
+                    <p>Total: ${formatCurrency(total)}</p>
+                    <h3>Item Pembelian:</h3>
+                    <ul>
+                `;
+    
+                // Tambahkan item ke konten struk
+                items.forEach(item => {
+                    content += `
+                        <li>
+                            ${item.name} - ${item.quantity} x ${formatCurrency(item.price)} = ${formatCurrency(item.subtotal)}
+                        </li>
+                    `;
+                });
+    
+                content += `</ul>`;
+    
+                // Buka jendela cetak
+                const printWindow = window.open('', '', 'width=600,height=400');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Struk Pembelian</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; }
+                                h2 { color: #333; }
+                                ul { list-style-type: none; padding: 0; }
+                                li { margin-bottom: 10px; }
+                            </style>
+                        </head>
+                        <body>
+                            ${content}
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+            } catch (error) {
+                console.error('Gagal mencetak struk:', error);
+                alert('Gagal mencetak struk. Silakan coba lagi.');
+            }
+        }
+    </script>
+</body>
+</html>
